@@ -6,8 +6,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ---
 
-## [1.0.1-dev] - unreleased
-
+## [1.0.1] - 2026-08-29
 ### Changed
 
 - The logo is redrawn, and the README now shows it with the wordmark rather than
