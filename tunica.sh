@@ -25,7 +25,7 @@
 # Copyright (c) 2026 Arelius-D | AGPL-3.0-only
 set -euo pipefail
 
-CODE_VERSION="1.0.1"
+CODE_VERSION="1.1.0-dev"
 SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
 HELP_LINES='2,24p'
 QUIET=no
