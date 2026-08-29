@@ -4,7 +4,7 @@
 
 # TunICA: Independent Component Analysis for Codebases
 
-> **Version:** 1.0.0
+> **Version:** 1.1.0-dev
 > **Core Philosophy:** "The map is accountable to the code."
 
 A diagram is only worth reading if it is evidence. TunICA derives its maps from the codebase itself, not from a model's impression of a README: every component names the files it was built from, every component map is drawn from the contents of those files, and any path the model invents is dropped before it can reach the page.
