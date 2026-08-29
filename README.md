@@ -1,8 +1,10 @@
 <div align="center">
-  <img src="assets/branding/tunica-lockup.png" alt="TunICA" width="300">
+  <img src="assets/branding/tunica-mark.png" alt="TunICA" width="80">
 </div>
 
 # TunICA: Independent Component Analysis for Codebases
+
+[![Release](https://img.shields.io/github/v/release/Arelius-D/TunICA?label=release&color=blue)](https://github.com/Arelius-D/TunICA/releases) [![License](https://img.shields.io/github/license/Arelius-D/TunICA)](https://github.com/Arelius-D/TunICA/blob/main/LICENSE) [![Backend](https://img.shields.io/badge/Backend-Claude_CLI-%23D97757.svg)](#) [![Key](https://img.shields.io/badge/API_key-not_required-brightgreen.svg)](#) [![Viewer](https://img.shields.io/badge/Viewer-fully_offline-brightgreen.svg)](#)
 
 > **Version:** 1.1.0-dev
 > **Core Philosophy:** "The map is accountable to the code."
