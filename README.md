@@ -1,12 +1,12 @@
 <div align="center">
-  <img src="assets/branding/tunica-mark.png" alt="TunICA" width="80">
+  <img src="assets/branding/tunica-logo.png" alt="TunICA" width="180">
 </div>
 
-# TunICA: Independent Component Analysis for Codebases
+# Independent Component Analysis for Codebases
 
 [![Release](https://img.shields.io/github/v/release/Arelius-D/TunICA?label=release&color=blue)](https://github.com/Arelius-D/TunICA/releases) [![License](https://img.shields.io/github/license/Arelius-D/TunICA)](https://github.com/Arelius-D/TunICA/blob/main/LICENSE) [![Backend](https://img.shields.io/badge/Backend-Claude_CLI-%23D97757.svg)](#) [![Key](https://img.shields.io/badge/API_key-not_required-brightgreen.svg)](#) [![Viewer](https://img.shields.io/badge/Viewer-fully_offline-brightgreen.svg)](#)
 
-> **Version:** 1.1.0-dev
+> **Version:** 1.0.1-dev
 > **Core Philosophy:** "The map is accountable to the code."
 
 A diagram is only worth reading if it is evidence. TunICA derives its maps from the codebase itself, not from a model's impression of a README: every component names the files it was built from, every component map is drawn from the contents of those files, and any path the model invents is dropped before it can reach the page.
