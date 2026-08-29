@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="assets/branding/tunica-lockup.png" alt="TunICA" width="300">
+  <img src="assets/branding/tunica-mark.png" alt="TunICA" width="80">
 </div>
 
 # TunICA: Independent Component Analysis for Codebases
