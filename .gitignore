@@ -1,0 +1,26 @@
+# Generated maps. The folder is tracked, its contents are not: a map is an artefact
+# of a run against a specific commit, not source.
+out/*
+!out/.gitkeep
+
+# The published self-map keeps its maps, not the engine's scratch.
+docs/self-map/.work/
+
+# npm install used to produce viewer/vendor/. The vendored renderer itself IS committed.
+viewer/node_modules/
+
+viewer/out
+__pycache__/
+*.pyc
+*.bak
+
+# Run logs are machine specific. tunica.env ships with the repo on purpose: it is the
+# documented config, and an installed instance keeps its own copy.
+*.log
+
+# Private development surface: the release tooling, the workflow it enforces and the
+# stylesheet auditor are mine, not part of what a user installs or reads.
+bin/
+WORKFLOW.md
+verify/
+audit/

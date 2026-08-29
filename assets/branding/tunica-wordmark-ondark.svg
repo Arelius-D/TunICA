@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 200" width="620" height="200"
+     font-family="Poppins, Montserrat, Segoe UI, Inter, system-ui, Helvetica, Arial, sans-serif">
+  <title>TunICA wordmark</title>
+  <!-- Tun reads the onion outside-in: light slate, teal, green.  ICA takes the darkest. -->
+  <text x="310" y="104" font-size="112" font-weight="700" text-anchor="middle" letter-spacing="-1"><tspan fill="#6d87a2">T</tspan><tspan fill="#24a893">u</tspan><tspan fill="#49cf88">n</tspan><tspan fill="#f5f9fa">ICA</tspan></text>
+  <text x="310" y="146" font-size="23" font-weight="500" fill="#6d87a2" text-anchor="middle" letter-spacing="0.6">INDEPENDENT COMPONENT ANALYSIS</text>
+  <text x="310" y="176" font-size="23" font-weight="500" fill="#6d87a2" text-anchor="middle" letter-spacing="0.6">FOR CODEBASES</text>
+</svg>
