@@ -20,6 +20,10 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Re-running the installer over an installation overwrote `tunica.env` with the
   template, discarding every setting, and then reported that it had kept them.
   `copy_payload` no longer replaces a config that is already there.
+- The shipped `tunica.env` carried a live viewer port and a public URL from the
+  machine it was written on, so every installation started out configured as
+  someone else's instance. Both lines are commented out again: the port falls
+  back to the documented default and the URL is unset until you set it.
 
 ---
 
