@@ -17,7 +17,8 @@
 #
 # The installer copies TunICA into a directory you name, optionally sets a `tunica`
 # alias in the shells you choose, and writes a .env you can edit afterwards. It
-# never uses sudo, never writes outside your home, and logs everything it does.
+# writes nothing outside your home, uses sudo only where it says it will, and logs
+# everything it does.
 # Copyright (c) 2026 Arelius-D | AGPL-3.0-only
 set -euo pipefail
 
@@ -29,7 +30,7 @@ if [ -n "$SELF" ] && [ -f "$SELF" ]; then
 else
   SOURCE_DIR="$PWD"
 fi
-HELP_LINES='2,20p'
+HELP_LINES='2,21p'
 NL=$'\n'
 LOG_FILE="${TUNICA_INSTALL_LOG:-}"
 LOG_BUFFER=""

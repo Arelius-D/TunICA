@@ -9,8 +9,8 @@
 #   tunica view [name] [port]                         serve the maps in a browser
 #   tunica remove <name> [-y]                         delete a stored map
 #   tunica service <install|remove|status>            optional: run the viewer as a
-#                                                     systemd --user service. Off unless
-#                                                     you ask; no sudo, no system unit.
+#                                                     systemd --user service, never a
+#                                                     system unit; sudo only if you agree.
 #
 #   -d 1|2      depth: 1 = system map only, 2 = + one map per component
 #   -o DIR      write this run's map here (default: <out root>/<repo-name>)
@@ -195,10 +195,20 @@ EOU
         log WARNING "  Set TUNICA_VIEW_BIND=0.0.0.0 in $SCRIPT_DIR/tunica.env to reach it from the network,"
         log WARNING "  then: systemctl --user restart tunica.service"
       fi
-      if [ "$(loginctl show-user "$(id -un)" -p Linger --value 2>/dev/null)" != "yes" ]; then
-        log WARNING "lingering is off: this stops when you log out. Enable it with:"
-        log WARNING "  loginctl enable-linger $(id -un)"
-        log WARNING "  (that one command may ask for your password; nothing else here does)"
+      WHO="$(id -un)"
+      if [ "$(loginctl show-user "$WHO" -p Linger --value 2>/dev/null)" != "yes" ]; then
+        AGREED=no
+        if [ -r /dev/tty ]; then
+          printf 'keep it running after you log out? runs: sudo loginctl enable-linger %s [Y/n]: ' "$WHO" > /dev/tty
+          read -r REPLY < /dev/tty || REPLY=""
+          case "${REPLY:-y}" in [yY]*) AGREED=yes ;; esac
+        fi
+        if [ "$AGREED" = yes ] && sudo loginctl enable-linger "$WHO"; then
+          log INFO "lingering on: the viewer survives a logout and a reboot"
+        else
+          log WARNING "lingering off: the viewer stops when you log out. Turn it on with:"
+          log WARNING "  sudo loginctl enable-linger $WHO"
+        fi
       fi
       ;;
     remove)
