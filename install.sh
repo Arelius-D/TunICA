@@ -22,7 +22,7 @@
 # Copyright (c) 2026 Arelius-D | AGPL-3.0-only
 set -euo pipefail
 
-CODE_VERSION="1.3.0"
+CODE_VERSION="1.4.0"
 REPO_SLUG="Arelius-D/TunICA"
 SELF="${BASH_SOURCE[0]:-}"
 if [ -n "$SELF" ] && [ -f "$SELF" ]; then
