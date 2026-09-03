@@ -81,21 +81,38 @@ INSTALL_DIR="${INSTALL_DIR/#\~/$HOME}"
 check_deps() {
   local missing=0 p
   for p in bash python3; do
-    if command -v "$p" >/dev/null; then log INFO "  $p: $(command -v "$p")"
-    else log ERROR "  $p: MISSING (required)"; missing=1; fi
+    command -v "$p" >/dev/null || { log ERROR "$p is required and was not found"; missing=1; }
   done
-  if command -v git >/dev/null; then log INFO "  git: $(command -v git)"
-  else log WARNING "  git: missing. Local paths still work, URL targets do not"; fi
+  command -v git >/dev/null || log WARNING "git not found: local paths still work, URL targets do not"
   local claude; claude="${TUNICA_CLAUDE_BIN:-$(command -v claude || true)}"
   [ -n "$claude" ] || { [ -x "$HOME/.local/bin/claude" ] && claude="$HOME/.local/bin/claude"; }
-  if [ -n "$claude" ] && [ -x "$claude" ]; then
-    log INFO "  claude: $claude ($("$claude" --version 2>/dev/null | head -1))"
-  else
-    log WARNING "  claude: NOT FOUND. TunICA cannot map anything until the Claude CLI is installed and logged in"
-    log WARNING "          install it, then re-run: $0 --check"
+  if [ -z "$claude" ] || [ ! -x "$claude" ]; then
+    log ERROR "the Claude Code CLI was not found, and it is the model backend"
+    log ERROR "  install it and log in, then run this installer again"
+    missing=1
   fi
   printf '%s' "$claude" > /tmp/.tunica-claude-path.$$ 2>/dev/null || true
-  return $missing
+  [ "$missing" -eq 0 ] || return 1
+  log INFO "dependencies ok"
+  return 0
+}
+
+ask_install_dir() {
+  local def="$1" reply
+  while :; do
+    reply="$(ask "install to $def? (y/n, or another path under \$HOME)" "y")"
+    case "$reply" in
+      [yY]|[yY][eE][sS]) printf '%s' "$def"; return 0 ;;
+      [nN]|[nN][oO]) return 1 ;;
+      *)
+        reply="${reply/#\~/$HOME}"
+        case "$reply" in
+          "$HOME"/*) printf '%s' "${reply%/}"; return 0 ;;
+          *) log WARNING "  $reply is outside \$HOME. TunICA installs into your home directory only." >&2 ;;
+        esac
+        ;;
+    esac
+  done
 }
 
 # ---------------------------------------------------------------- source resolution
@@ -259,16 +276,14 @@ do_install() {
   local src fresh=yes
   [ -d "$INSTALL_DIR/lib" ] && fresh=no
   log INFO "TunICA installer $CODE_VERSION"
-  log INFO "dependencies:"
-  check_deps || die "a required dependency is missing"
+  check_deps || die "the environment is not ready. Nothing was installed"
 
   if [ "$fresh" = yes ]; then
-    log INFO "where should TunICA be installed? Enter accepts the default."
-    INSTALL_DIR="$(ask "install location" "$INSTALL_DIR")"
-    INSTALL_DIR="${INSTALL_DIR/#\~/$HOME}"
+    INSTALL_DIR="$(ask_install_dir "$INSTALL_DIR")" || { log INFO "cancelled"; return; }
   fi
   case "$INSTALL_DIR" in
-    /usr/*|/opt/*|/etc/*|/bin/*|/sbin/*) die "refusing to install outside your home directory: $INSTALL_DIR" ;;
+    "$HOME"/*|"$HOME") ;;
+    *) die "refusing to install outside your home directory: $INSTALL_DIR" ;;
   esac
 
   src="$(resolve_source)"

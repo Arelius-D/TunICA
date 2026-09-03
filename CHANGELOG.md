@@ -18,6 +18,14 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
   brackets meant, so the first thing a new install asks for looked like a
   question with no obvious answer. Each one now reads `[Enter = <default>]`, and
   the install location and onboarding are introduced by a line saying so.
+- The dependency report listed every tool it found. It now says one line when
+  everything is present and speaks up only about what is missing.
+- A missing Claude CLI was a warning, so the installer asked where to install and
+  what model to use before finishing an installation that could not map anything.
+  It is a required dependency: the run stops before the first question and
+  nothing is written.
+- The install location prompt asked for a path. It now asks whether to use the
+  default, and takes a different path under `$HOME` if you type one instead.
 
 ---
 
