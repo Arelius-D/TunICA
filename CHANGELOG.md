@@ -12,6 +12,10 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ### Changed
 
+- Uninstalling names the directory it removed and nothing else. The line also
+  announced the installer log, which lives inside that directory and goes with
+  it either way.
+
 ### Fixed
 
 ---
