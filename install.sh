@@ -66,6 +66,15 @@ confirm() {
   fi
   case "$reply" in [yY]*) return 0 ;; *) return 1 ;; esac
 }
+under_home() {
+  local home target
+  home="$(readlink -m "$HOME")"
+  target="${1/#\~/$HOME}"
+  case "$target" in /*) ;; *) target="$HOME/$target" ;; esac
+  target="$(readlink -m "$target")"
+  case "$target" in "$home"/*) printf '%s' "$target"; return 0 ;; esac
+  return 1
+}
 
 # ---------------------------------------------------------------- args
 while [ $# -gt 0 ]; do
@@ -81,7 +90,9 @@ while [ $# -gt 0 ]; do
     *) printf 'unknown option: %s\n\n' "$1" >&2; usage >&2; exit 2 ;;
   esac
 done
-INSTALL_DIR="${INSTALL_DIR/#\~/$HOME}"
+RESOLVED_DIR="$(under_home "$INSTALL_DIR")" \
+  || die "TunICA installs into your home directory only: $INSTALL_DIR"
+INSTALL_DIR="$RESOLVED_DIR"
 
 # ---------------------------------------------------------------- dependencies
 check_deps() {
@@ -104,7 +115,7 @@ check_deps() {
 }
 
 ask_install_dir() {
-  local def="$1" reply
+  local def="$1" reply resolved
   while :; do
     if [ "$ASSUME_YES" = yes ] || [ ! -r /dev/tty ]; then printf '%s' "$def"; return 0; fi
     read -r -p "install to $def? [Y/n, or another path under \$HOME]: " reply < /dev/tty || reply=""
@@ -112,11 +123,8 @@ ask_install_dir() {
       [yY]|[yY][eE][sS]) printf '%s' "$def"; return 0 ;;
       [nN]|[nN][oO]) return 1 ;;
       *)
-        reply="${reply/#\~/$HOME}"
-        case "$reply" in
-          "$HOME"/*) printf '%s' "${reply%/}"; return 0 ;;
-          *) log WARNING "  $reply is outside \$HOME. TunICA installs into your home directory only." >&2 ;;
-        esac
+        if resolved="$(under_home "$reply")"; then printf '%s' "$resolved"; return 0; fi
+        log WARNING "  $reply is outside \$HOME. TunICA installs into your home directory only." >&2
         ;;
     esac
   done
@@ -290,7 +298,7 @@ do_install() {
     INSTALL_DIR="$(ask_install_dir "$INSTALL_DIR")" || { log INFO "cancelled"; return; }
   fi
   case "$INSTALL_DIR" in
-    "$HOME"/*|"$HOME") ;;
+    "$HOME"/*) ;;
     *) die "refusing to install outside your home directory: $INSTALL_DIR" ;;
   esac
 

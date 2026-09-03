@@ -14,6 +14,19 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ### Fixed
 
+- The install location prompt asks for "another path under `$HOME`" and then
+  rejected one. Answering `Apps/TunICA` was refused as being outside `$HOME`,
+  because the answer was only accepted when it already began with the full
+  `/home/you/`, and the prompt looped on the same question with no way to say
+  what it wanted. A relative answer is now taken as relative to `$HOME`, which is
+  what the question asks for, and `--path` reads a path the same way. Both
+  resolve `~`, `.` and `..` before deciding, so a path that climbs out of your
+  home directory is still refused rather than accepted on the strength of its
+  first few characters.
+- `--path $HOME` was accepted as an install location, which made
+  `install.sh --uninstall` a command that deletes your home directory. The
+  installer now takes a directory under `$HOME`, never `$HOME` itself.
+
 ---
 
 ## [1.0.5] - 2026-09-03
