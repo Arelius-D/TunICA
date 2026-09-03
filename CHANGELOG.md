@@ -12,6 +12,15 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ### Fixed
 
+- A fresh install skipped its onboarding questions. The installer decided whether
+  to ask by looking for settings in `tunica.env`, but the file it was reading had
+  just been copied from the shipped template, which has them. It now asks when the
+  installation is new and stays quiet when it is not, so the line about keeping
+  existing settings is only printed when there are existing settings to keep.
+- Re-running the installer over an installation overwrote `tunica.env` with the
+  template, discarding every setting, and then reported that it had kept them.
+  `copy_payload` no longer replaces a config that is already there.
+
 ---
 
 ## [1.0.1] - 2026-08-29

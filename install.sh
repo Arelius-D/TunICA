@@ -155,6 +155,8 @@ copy_payload() {
   mkdir -p "$dst"
   for item in "${PAYLOAD[@]}"; do
     [ -e "$src/$item" ] || continue
+    # never overwrite a live config; do_update merges new settings into it instead
+    if [ "$item" = tunica.env ] && [ -f "$dst/tunica.env" ]; then continue; fi
     rm -rf "$dst/${item%/}"
     cp -R "$src/$item" "$dst/"
   done
@@ -232,8 +234,9 @@ set_setting() {
 }
 
 onboard() {
+  local fresh="${1:-no}"
   local env_file="$INSTALL_DIR/tunica.env" claude model out_root
-  if grep -qE '^TUNICA_[A-Z_]+=' "$env_file" 2>/dev/null; then
+  if [ "$fresh" != yes ]; then
     log INFO "keeping the settings already in $env_file"
     return
   fi
@@ -270,7 +273,7 @@ do_install() {
   [ -n "$src" ] && [ -f "$src/tunica.sh" ] || die "could not resolve a TunICA source tree"
   log INFO "installing $(installed_version "$src") -> $INSTALL_DIR"
   copy_payload "$src" "$INSTALL_DIR"
-  onboard
+  onboard "$fresh"
   [ "$WIRE_PATH" = yes ] && wire_path || log INFO "alias: skipped (--no-alias)"
 
   log INFO "verifying"
