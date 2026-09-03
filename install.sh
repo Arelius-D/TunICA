@@ -155,7 +155,6 @@ copy_payload() {
   mkdir -p "$dst"
   for item in "${PAYLOAD[@]}"; do
     [ -e "$src/$item" ] || continue
-    # never overwrite a live config; do_update merges new settings into it instead
     if [ "$item" = tunica.env ] && [ -f "$dst/tunica.env" ]; then continue; fi
     rm -rf "$dst/${item%/}"
     cp -R "$src/$item" "$dst/"
