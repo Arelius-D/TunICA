@@ -24,6 +24,10 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
   machine it was written on, so every installation started out configured as
   someone else's instance. Both lines are commented out again: the port falls
   back to the documented default and the URL is unset until you set it.
+- Onboarding never asked which port the viewer should use, so an installation
+  always came up on the built-in default and a second instance on the same
+  machine collided with the first. It is now one of the questions asked at
+  install time.
 
 ---
 

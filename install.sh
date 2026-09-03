@@ -235,18 +235,20 @@ set_setting() {
 
 onboard() {
   local fresh="${1:-no}"
-  local env_file="$INSTALL_DIR/tunica.env" claude model out_root
+  local env_file="$INSTALL_DIR/tunica.env" claude model out_root view_port
   if [ "$fresh" != yes ]; then
     log INFO "keeping the settings already in $env_file"
     return
   fi
   claude="$(cat /tmp/.tunica-claude-path.$$ 2>/dev/null || true)"
-  log INFO "onboarding: three questions, all changeable later in $env_file"
+  log INFO "onboarding: four questions, all changeable later in $env_file"
   model="$(ask "  default model (sonnet / opus / haiku)" "sonnet")"
   out_root="$(ask "  where should generated maps be written" "$INSTALL_DIR/out")"
   out_root="${out_root/#\~/$HOME}"
   mkdir -p "$out_root"
+  view_port="$(ask "  port for the local viewer" "8864")"
   set_setting "$env_file" TUNICA_MODEL "$model"
+  set_setting "$env_file" TUNICA_VIEW_PORT "$view_port"
   set_setting "$env_file" TUNICA_OUT_ROOT "$out_root"
   set_setting "$env_file" TUNICA_LOG_FILE "$INSTALL_DIR/tunica.log"
   [ -n "$claude" ] && set_setting "$env_file" TUNICA_CLAUDE_BIN "$claude"
