@@ -14,6 +14,18 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ### Fixed
 
+- The installer kept its log at `$HOME/.tunica-install.log`, outside the
+  installation, and left it there when the installation was removed, which is
+  why uninstalling ended by asking whether to delete a stray file. The log was
+  named at the top of the script, before the target directory is known, and for
+  a fresh install the target does not exist until the first question is
+  answered. Lines are now held until the target is known and then written to
+  `install.log` inside it, so an installation owns its own log, an update and a
+  check append to it, and an uninstall takes it away with everything else. A run
+  that ends before a target exists, a failed dependency check, writes nothing at
+  all: those lines were printed to the terminal. `TUNICA_INSTALL_LOG` still puts
+  the log wherever you say.
+
 ---
 
 ## [1.1.1] - 2026-09-03

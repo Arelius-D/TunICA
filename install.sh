@@ -31,7 +31,8 @@ else
 fi
 HELP_LINES='2,20p'
 NL=$'\n'
-LOG_FILE="${TUNICA_INSTALL_LOG:-$HOME/.tunica-install.log}"
+LOG_FILE="${TUNICA_INSTALL_LOG:-}"
+LOG_BUFFER=""
 INSTALL_DIR="${TUNICA_INSTALL_DIR:-}"
 ASSUME_YES=no
 ACTION=install
@@ -47,8 +48,21 @@ usage() {
 }
 log() {
   local level="$1"; shift
+  local line
   printf '[%s] %s\n' "$level" "$*"
-  printf '[%s] [%s] %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$level" "$*" >> "$LOG_FILE" 2>/dev/null || true
+  line="$(printf '[%s] [%s] %s' "$(date '+%Y-%m-%d %H:%M:%S')" "$level" "$*")"
+  if [ -n "$LOG_FILE" ]; then
+    printf '%s\n' "$line" >> "$LOG_FILE" 2>/dev/null || true
+  else
+    LOG_BUFFER="$LOG_BUFFER$line$NL"
+  fi
+}
+open_log() {
+  [ -z "$LOG_FILE" ] || return 0
+  [ -d "$INSTALL_DIR" ] || return 0
+  LOG_FILE="$INSTALL_DIR/install.log"
+  [ -z "$LOG_BUFFER" ] || printf '%s' "$LOG_BUFFER" >> "$LOG_FILE" 2>/dev/null || true
+  LOG_BUFFER=""
 }
 die() { log ERROR "$*"; exit 1; }
 ask() {
@@ -103,6 +117,7 @@ done
 RESOLVED_DIR="$(under_home "$INSTALL_DIR")" \
   || die "TunICA installs into your home directory only: $INSTALL_DIR"
 INSTALL_DIR="$RESOLVED_DIR"
+open_log
 
 # ---------------------------------------------------------------- dependencies
 check_deps() {
@@ -330,6 +345,7 @@ do_install() {
   [ -n "$src" ] && [ -f "$src/tunica.sh" ] || die "could not resolve a TunICA source tree"
   log INFO "installing $(installed_version "$src") -> $INSTALL_DIR"
   copy_payload "$src" "$INSTALL_DIR"
+  open_log
   onboard "$fresh"
   [ "$WIRE_PATH" = yes ] && wire_path || log INFO "alias: skipped (--no-alias)"
 
@@ -392,8 +408,8 @@ do_uninstall() {
     else log INFO "kept your maps in $out_root"; fi
   fi
   rm -rf "$INSTALL_DIR"
-  log INFO "removed $INSTALL_DIR"
-  confirm "remove the installer log $LOG_FILE too?" n && rm -f "$LOG_FILE" || true
+  LOG_FILE="${TUNICA_INSTALL_LOG:-}"
+  log INFO "removed $INSTALL_DIR, and the installer log that lived in it"
 }
 
 do_check() {
