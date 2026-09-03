@@ -53,7 +53,7 @@ die() { log ERROR "$*"; exit 1; }
 ask() {
   local prompt="$1" default="$2" reply
   if [ "$ASSUME_YES" = yes ] || [ ! -r /dev/tty ]; then printf '%s' "$default"; return; fi
-  read -r -p "$prompt  [Enter = $default]: " reply < /dev/tty || reply=""
+  read -r -p "$prompt  [Enter = ${default:-skip}]: " reply < /dev/tty || reply=""
   printf '%s' "${reply:-$default}"
 }
 confirm() {
@@ -268,19 +268,33 @@ set_setting() {
 onboard() {
   local fresh="${1:-no}"
   local env_file="$INSTALL_DIR/tunica.env" claude model out_root view_port
+  local reach view_bind view_url=""
   if [ "$fresh" != yes ]; then
     log INFO "keeping the settings already in $env_file"
     return
   fi
   claude="$(cat /tmp/.tunica-claude-path.$$ 2>/dev/null || true)"
-  log INFO "three questions, all changeable later in $env_file. Enter accepts each default."
+  log INFO "four questions, all changeable later in $env_file. Enter accepts each default."
   model="$(ask "  default model (sonnet / opus / haiku)" "sonnet")"
   out_root="$(ask "  where should generated maps be written" "$INSTALL_DIR/out")"
   out_root="${out_root/#\~/$HOME}"
   mkdir -p "$out_root"
   view_port="$(ask "  port for the local viewer" "8866")"
+  reach="$(ask "  how will you reach the viewer?
+    1  from this machine only
+    2  from other machines on your network
+    3  through a reverse proxy
+  answer" "1")"
+  case "$reach" in
+    2) view_bind="0.0.0.0" ;;
+    3) view_url="$(ask "    public address the proxy serves it at, e.g. https://maps.example.org/tunica" "")"
+       view_bind="$(ask "    address the viewer listens on for that proxy, or 0.0.0.0 for every interface" "0.0.0.0")" ;;
+    *) view_bind="127.0.0.1" ;;
+  esac
   set_setting "$env_file" TUNICA_MODEL "$model"
   set_setting "$env_file" TUNICA_VIEW_PORT "$view_port"
+  set_setting "$env_file" TUNICA_VIEW_BIND "$view_bind"
+  [ -n "$view_url" ] && set_setting "$env_file" TUNICA_VIEW_URL "$view_url"
   set_setting "$env_file" TUNICA_OUT_ROOT "$out_root"
   set_setting "$env_file" TUNICA_LOG_FILE "$INSTALL_DIR/tunica.log"
   [ -n "$claude" ] && set_setting "$env_file" TUNICA_CLAUDE_BIN "$claude"

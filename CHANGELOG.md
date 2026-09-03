@@ -10,6 +10,19 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ### Added
 
+- Onboarding asks how you will reach the viewer, and writes the answer, so a
+  fresh installation is reachable without opening a file afterwards. From this
+  machine only, from other machines on your network, or through a reverse proxy;
+  the third also asks the public address the proxy serves it at. The answer is
+  stored as `TUNICA_VIEW_BIND`, and the address as `TUNICA_VIEW_URL`, which is
+  the link `tunica view` prints and not what the server listens on. A question
+  with no useful default now offers `[Enter = skip]` rather than an empty one.
+  Until now the install asked for a port and left the bind address at `auto`,
+  which is loopback unless the shell starting the viewer is an SSH session, and
+  is loopback under a systemd service whatever the shell was. A proxy on the same
+  host then reached a port bound to loopback, answered 502, and nothing in the
+  installation had said which setting decides that.
+
 ### Changed
 
 ### Fixed
