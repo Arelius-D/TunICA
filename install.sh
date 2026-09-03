@@ -324,6 +324,13 @@ onboard() {
   set_setting "$env_file" TUNICA_LOG_FILE "$INSTALL_DIR/tunica.log"
   [ -n "$claude" ] && set_setting "$env_file" TUNICA_CLAUDE_BIN "$claude"
   log INFO "settings written into $env_file"
+  if [ -x "$INSTALL_DIR/tunica.sh" ] \
+     && confirm "  keep the viewer running as a systemd --user service?" n; then
+    "$INSTALL_DIR/tunica.sh" service install \
+      || log WARNING "  not installed. Do it later with: tunica service install"
+  else
+    log INFO "the viewer runs in a terminal with 'tunica view'. Make it a service later with: tunica service install"
+  fi
 }
 
 # ---------------------------------------------------------------- actions

@@ -102,11 +102,13 @@ prune_log() {
 if [ "${1:-}" = "view" ]; then
   NAME="${2:-}"; PORT="${3:-$VIEW_PORT}"
   [ -n "$NAME" ] || NAME="$(ls -1 "$OUT_ROOT" 2>/dev/null | grep -v '^\.' | head -1 || true)"
-  [ -n "$NAME" ] && [ -d "$OUT_ROOT/$NAME" ] || die "no maps found in $OUT_ROOT. Run an analysis first"
+  [ -z "$NAME" ] || [ -d "$OUT_ROOT/$NAME" ] || die "no map called $NAME in $OUT_ROOT"
+  mkdir -p "$OUT_ROOT" 2>/dev/null || true
   ln -sfn "$OUT_ROOT" "$SCRIPT_DIR/viewer/out" 2>/dev/null || die "cannot expose $OUT_ROOT to the viewer"
   BIND="$VIEW_BIND"
   [ "$BIND" != auto ] || { [ -n "${SSH_CONNECTION:-}" ] && BIND=0.0.0.0 || BIND=127.0.0.1; }
-  QUERY="?repo=$NAME&name=overview"
+  QUERY=""
+  [ -z "$NAME" ] || QUERY="?repo=$NAME&name=overview"
 
   if [ -n "${TUNICA_VIEW_URL:-}" ]; then
     log INFO "view: ${TUNICA_VIEW_URL%/}/$QUERY"
@@ -121,7 +123,11 @@ if [ "${1:-}" = "view" ]; then
   else
     log INFO "view: http://$BIND:$PORT/$QUERY"
   fi
-  log INFO "      component map: same URL with &name=<component-id>"
+  if [ -n "$NAME" ]; then
+    log INFO "      component map: same URL with &name=<component-id>"
+  else
+    log INFO "      no maps yet: the page lists them as they appear. Make one with: tunica <repo>"
+  fi
   log INFO "      the server runs until you stop it with Ctrl+C"
 
   if [ "$BIND" = 0.0.0.0 ] || [ "$BIND" = "::" ]; then

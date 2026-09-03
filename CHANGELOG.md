@@ -10,9 +10,23 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ### Added
 
+- The install asks whether to keep the viewer running as a systemd --user
+  service, the last question of onboarding. It answers no by default, and a
+  scripted install with `-y` never installs one, so nothing appears in
+  `~/.config/systemd/user/` unless you say yes. Until now the service existed
+  only as `tunica service install`, which nothing mentioned while installing, so
+  a finished install left you with a viewer that was not running and a proxy in
+  front of it answering 502.
+
 ### Changed
 
 ### Fixed
+
+- `tunica view` refused to start while the out root held no maps, which is every
+  fresh installation. Nothing could be served until the first repository was
+  mapped, and a service installed before that would have failed and retried
+  every five seconds. It now starts and serves the index, which lists maps as
+  they appear. Asking for a map by name that does not exist is still an error.
 
 ---
 
