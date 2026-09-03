@@ -276,7 +276,7 @@ class Handler(SimpleHTTPRequestHandler):
 
 
 def main():
-    port = int(sys.argv[1]) if len(sys.argv) > 1 else 8864
+    port = int(sys.argv[1]) if len(sys.argv) > 1 else 8866
     bind = sys.argv[2] if len(sys.argv) > 2 else "127.0.0.1"
     ThreadingHTTPServer((bind, port), partial(Handler, directory=str(VIEWER_DIR))).serve_forever()
 

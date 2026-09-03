@@ -28,6 +28,9 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
   always came up on the built-in default and a second instance on the same
   machine collided with the first. It is now one of the questions asked at
   install time.
+- The viewer's default port is 8866. It was 8864, which is also the port the
+  bundled server fell back to when started directly, so the two had to be kept
+  in step by hand.
 
 ---
 

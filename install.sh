@@ -246,7 +246,7 @@ onboard() {
   out_root="$(ask "  where should generated maps be written" "$INSTALL_DIR/out")"
   out_root="${out_root/#\~/$HOME}"
   mkdir -p "$out_root"
-  view_port="$(ask "  port for the local viewer" "8864")"
+  view_port="$(ask "  port for the local viewer" "8866")"
   set_setting "$env_file" TUNICA_MODEL "$model"
   set_setting "$env_file" TUNICA_VIEW_PORT "$view_port"
   set_setting "$env_file" TUNICA_OUT_ROOT "$out_root"

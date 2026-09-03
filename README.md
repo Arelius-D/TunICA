@@ -269,7 +269,7 @@ Settings live in `tunica.env`, which ships with TunICA and sits beside the scrip
 | `TUNICA_MAX_FILES` | `4000` | refuse repositories larger than this |
 | `TUNICA_MAX_FILE_BYTES` | `60000` | bytes of a single file sent to the model |
 | `TUNICA_MAX_COMPONENT_BYTES` | `120000` | bytes of one component's files combined |
-| `TUNICA_VIEW_PORT` | `8864` | port used by `tunica view`, from TUNI on a phone keypad |
+| `TUNICA_VIEW_PORT` | `8866` | port used by `tunica view` |
 | `TUNICA_VIEW_BIND` | `auto` | which interface the viewer listens on: `auto` binds every interface over SSH and loopback locally; or force `0.0.0.0`, `127.0.0.1`, or one specific address |
 | `TUNICA_VIEW_ALLOW_GENERATE` | `false` | let the viewer page map a repository and remove a stored map. Off by default: a run spends your tokens and clones what it is given, and a removal is permanent |
 | `TUNICA_VIEW_URL` | unset | public address to print instead of `host:port`, for a host behind a reverse proxy |
@@ -340,16 +340,16 @@ Two instances, two routes. The installed one you use, and the checkout you devel
 
 ```caddyfile
 yourdomain.com {
-    # the installed instance: ~/TunICA, TUNICA_VIEW_PORT=8864
+    # the installed instance: ~/TunICA, TUNICA_VIEW_PORT=8866
     handle /tunica/* {
         uri strip_prefix /tunica
-        reverse_proxy 172.17.0.1:8864     # docker bridge gateway, not 127.0.0.1
+        reverse_proxy 172.17.0.1:8866     # docker bridge gateway, not 127.0.0.1
     }
 
-    # the dev checkout: ~/GitHub/TunICA, TUNICA_VIEW_PORT=8865
+    # the dev checkout: ~/GitHub/TunICA, TUNICA_VIEW_PORT=8867
     handle /tunica-dev/* {
         uri strip_prefix /tunica-dev
-        reverse_proxy 172.17.0.1:8865
+        reverse_proxy 172.17.0.1:8867
     }
 }
 ```
@@ -358,11 +358,11 @@ Set the port per instance in each one's own `tunica.env`, and `TUNICA_VIEW_URL` 
 
 ```bash
 # ~/TunICA/tunica.env
-TUNICA_VIEW_PORT="8864"
+TUNICA_VIEW_PORT="8866"
 TUNICA_VIEW_URL="https://yourdomain.com/tunica"
 
 # ~/GitHub/TunICA/tunica.env
-TUNICA_VIEW_PORT="8865"
+TUNICA_VIEW_PORT="8867"
 TUNICA_VIEW_URL="https://yourdomain.com/tunica-dev"
 ```
 
