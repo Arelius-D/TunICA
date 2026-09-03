@@ -14,6 +14,13 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ### Fixed
 
+- The one-line installer could not install anything. It downloads TunICA when it
+  is run outside a checkout, and the line announcing the download was captured as
+  part of the path it returned, so the fetched tree was never found: every run of
+  the command in the README ended in `could not resolve a TunICA source tree`. A
+  failed download reported that same generic message instead of its own, and the
+  temporary tree was left behind in `/tmp`.
+
 ---
 
 ## [1.0.3] - 2026-09-03

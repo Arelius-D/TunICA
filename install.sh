@@ -117,6 +117,7 @@ ask_install_dir() {
 
 # ---------------------------------------------------------------- source resolution
 FETCH_ROOT=""
+SRC=""
 cleanup() { [ -n "$FETCH_ROOT" ] && rm -rf "$FETCH_ROOT"; rm -f /tmp/.tunica-claude-path.$$; }
 trap cleanup EXIT
 
@@ -125,14 +126,14 @@ resolve_source() {
   here="$(cd "$SOURCE_DIR" 2>/dev/null && pwd || true)"
   there="$(cd "$INSTALL_DIR" 2>/dev/null && pwd || true)"
   if [ -f "$SOURCE_DIR/tunica.sh" ] && [ -d "$SOURCE_DIR/lib" ] && [ "$here" != "$there" ]; then
-    printf '%s' "$SOURCE_DIR"; return
+    SRC="$SOURCE_DIR"; return
   fi
   command -v curl >/dev/null || die "curl is required to download TunICA"
   FETCH_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/tunica-fetch-XXXXXX")"
   log INFO "downloading $REPO_SLUG (main)"
   curl -fsSL "https://codeload.github.com/$REPO_SLUG/tar.gz/refs/heads/main" \
     | tar -xz -C "$FETCH_ROOT" || die "download failed. Check the network, or install from a checkout"
-  printf '%s' "$(find "$FETCH_ROOT" -maxdepth 1 -type d -name 'TunICA-*' | head -1)"
+  SRC="$(find "$FETCH_ROOT" -maxdepth 1 -type d -name 'TunICA-*' | head -1)"
 }
 
 merge_env() {
@@ -286,7 +287,7 @@ do_install() {
     *) die "refusing to install outside your home directory: $INSTALL_DIR" ;;
   esac
 
-  src="$(resolve_source)"
+  resolve_source; src="$SRC"
   [ -n "$src" ] && [ -f "$src/tunica.sh" ] || die "could not resolve a TunICA source tree"
   log INFO "installing $(installed_version "$src") -> $INSTALL_DIR"
   copy_payload "$src" "$INSTALL_DIR"
@@ -307,7 +308,7 @@ do_update() {
   [ -f "$INSTALL_DIR/tunica.sh" ] || die "nothing installed at $INSTALL_DIR. Run without --update first"
   local src current candidate
   current="$(installed_version "$INSTALL_DIR")"
-  src="$(resolve_source)"
+  resolve_source; src="$SRC"
   [ -n "$src" ] && [ -f "$src/tunica.sh" ] || die "could not resolve a TunICA source tree"
   candidate="$(installed_version "$src")"
   log INFO "installed $current -> available $candidate"
