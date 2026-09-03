@@ -282,6 +282,7 @@ remove_alias_block() {
 }
 
 # ---------------------------------------------------------------- onboarding
+has_setting() { grep -qE "^[[:space:]]*$2=" "$1"; }
 set_setting() {
   local file="$1" key="$2" value="$3"
   if grep -qE "^#?${key}=" "$file"; then
@@ -292,44 +293,68 @@ set_setting() {
 }
 
 onboard() {
-  local fresh="${1:-no}"
-  local env_file="$INSTALL_DIR/tunica.env" claude model out_root view_port
-  local reach view_bind view_url=""
-  if [ "$fresh" != yes ]; then
-    log INFO "keeping the settings already in $env_file"
+  local env_file="$INSTALL_DIR/tunica.env" claude pending=0 key generate
+  local model out_root view_port reach view_bind view_url=""
+  local unit="$HOME/.config/systemd/user/tunica.service"
+  [ -f "$env_file" ] || return 0
+  claude="$(cat /tmp/.tunica-claude-path.$$ 2>/dev/null || true)"
+  has_setting "$env_file" TUNICA_LOG_FILE || set_setting "$env_file" TUNICA_LOG_FILE "$INSTALL_DIR/tunica.log"
+  if [ -n "$claude" ] && ! has_setting "$env_file" TUNICA_CLAUDE_BIN; then
+    set_setting "$env_file" TUNICA_CLAUDE_BIN "$claude"
+  fi
+  for key in TUNICA_MODEL TUNICA_OUT_ROOT TUNICA_VIEW_PORT TUNICA_VIEW_BIND TUNICA_VIEW_ALLOW_GENERATE; do
+    has_setting "$env_file" "$key" || pending=$((pending + 1))
+  done
+  [ -f "$unit" ] || pending=$((pending + 1))
+  if [ "$pending" -eq 0 ]; then
+    log INFO "every question is already answered in $env_file"
     return
   fi
-  claude="$(cat /tmp/.tunica-claude-path.$$ 2>/dev/null || true)"
-  log INFO "four questions, all changeable later in $env_file. Enter accepts each default."
-  model="$(ask "  default model (sonnet / opus / haiku)" "sonnet")"
-  out_root="$(ask "  where should generated maps be written" "$INSTALL_DIR/out")"
-  out_root="${out_root/#\~/$HOME}"
-  mkdir -p "$out_root"
-  view_port="$(ask "  port for the local viewer" "8866")"
-  reach="$(ask "  how will you reach the viewer?
+  if [ "$ASSUME_YES" = yes ] || [ ! -r /dev/tty ]; then
+    log INFO "$pending unanswered setting(s) in $env_file, each at its built-in default"
+    return
+  fi
+  log INFO "$pending question(s), all changeable later in $env_file. Enter accepts each default."
+  if ! has_setting "$env_file" TUNICA_MODEL; then
+    model="$(ask "  default model (sonnet / opus / haiku)" "sonnet")"
+    set_setting "$env_file" TUNICA_MODEL "$model"
+  fi
+  if ! has_setting "$env_file" TUNICA_OUT_ROOT; then
+    out_root="$(ask "  where should generated maps be written" "$INSTALL_DIR/out")"
+    out_root="${out_root/#\~/$HOME}"
+    mkdir -p "$out_root"
+    set_setting "$env_file" TUNICA_OUT_ROOT "$out_root"
+  fi
+  if ! has_setting "$env_file" TUNICA_VIEW_PORT; then
+    view_port="$(ask "  port for the local viewer" "8866")"
+    set_setting "$env_file" TUNICA_VIEW_PORT "$view_port"
+  fi
+  if ! has_setting "$env_file" TUNICA_VIEW_BIND; then
+    reach="$(ask "  how will you reach the viewer?
     1  from this machine only
     2  from other machines on your network
     3  through a reverse proxy
   answer" "1")"
-  case "$reach" in
-    2) view_bind="0.0.0.0" ;;
-    3) view_url="$(ask "    public address the proxy serves it at, e.g. https://maps.example.org/tunica" "")"
-       view_bind="$(ask "    address the viewer listens on for that proxy, or 0.0.0.0 for every interface" "0.0.0.0")" ;;
-    *) view_bind="127.0.0.1" ;;
-  esac
-  set_setting "$env_file" TUNICA_MODEL "$model"
-  set_setting "$env_file" TUNICA_VIEW_PORT "$view_port"
-  set_setting "$env_file" TUNICA_VIEW_BIND "$view_bind"
-  [ -n "$view_url" ] && set_setting "$env_file" TUNICA_VIEW_URL "$view_url"
-  set_setting "$env_file" TUNICA_OUT_ROOT "$out_root"
-  set_setting "$env_file" TUNICA_LOG_FILE "$INSTALL_DIR/tunica.log"
-  [ -n "$claude" ] && set_setting "$env_file" TUNICA_CLAUDE_BIN "$claude"
+    case "$reach" in
+      2) view_bind="0.0.0.0" ;;
+      3) view_url="$(ask "    public address the proxy serves it at, e.g. https://maps.example.org/tunica" "")"
+         view_bind="$(ask "    address the viewer listens on for that proxy, or 0.0.0.0 for every interface" "0.0.0.0")" ;;
+      *) view_bind="127.0.0.1" ;;
+    esac
+    set_setting "$env_file" TUNICA_VIEW_BIND "$view_bind"
+    [ -n "$view_url" ] && set_setting "$env_file" TUNICA_VIEW_URL "$view_url"
+  fi
+  if ! has_setting "$env_file" TUNICA_VIEW_ALLOW_GENERATE; then
+    generate=false
+    confirm "  let the viewer page map a repository and delete a map itself?" n && generate=true
+    set_setting "$env_file" TUNICA_VIEW_ALLOW_GENERATE "$generate"
+  fi
   log INFO "settings written into $env_file"
-  if [ -x "$INSTALL_DIR/tunica.sh" ] \
+  if [ ! -f "$unit" ] && [ -x "$INSTALL_DIR/tunica.sh" ] \
      && confirm "  keep the viewer running as a systemd --user service?" n; then
     "$INSTALL_DIR/tunica.sh" service install \
       || log WARNING "  not installed. Do it later with: tunica service install"
-  else
+  elif [ ! -f "$unit" ]; then
     log INFO "the viewer runs in a terminal with 'tunica view'. Make it a service later with: tunica service install"
   fi
 }
@@ -354,7 +379,7 @@ do_install() {
   log INFO "installing $(installed_version "$src") -> $INSTALL_DIR"
   copy_payload "$src" "$INSTALL_DIR"
   open_log
-  onboard "$fresh"
+  onboard
   [ "$WIRE_PATH" = yes ] && wire_path || log INFO "alias: skipped (--no-alias)"
 
   log INFO "verifying"
@@ -384,6 +409,7 @@ do_update() {
     mv "$INSTALL_DIR/.tunica.env.keep" "$INSTALL_DIR/tunica.env"
     merge_env "$src/tunica.env" "$INSTALL_DIR/tunica.env" "$candidate"
   fi
+  onboard
   "$INSTALL_DIR/tunica.sh" -v >/dev/null || die "updated copy does not run"
   log INFO "updated to $(installed_version "$INSTALL_DIR"); your settings and existing maps kept"
   if systemctl --user is-active tunica.service >/dev/null 2>&1; then

@@ -10,6 +10,17 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ### Added
 
+- Onboarding asks whether the viewer page may map a repository and delete a map,
+  and writes `TUNICA_VIEW_ALLOW_GENERATE`. The page's controls do nothing while
+  that is false, which is what a fresh install had, and nothing said so.
+- Onboarding asks per setting rather than per install, so it covers every setting
+  that decides whether an installation works: model, out root, port, bind
+  address and public URL, page controls, and the service. A question whose
+  setting `tunica.env` already answers is not asked again, an update asks the
+  ones added since you installed, and the service question is skipped when a unit
+  is already there. `-y` and a run with no terminal ask nothing and write
+  nothing, as before.
+
 ### Changed
 
 ### Fixed
