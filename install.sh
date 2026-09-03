@@ -57,7 +57,13 @@ ask() {
   printf '%s' "${reply:-$default}"
 }
 confirm() {
-  local reply; reply="$(ask "$1 (y/n)" "$2")"
+  local prompt="$1" default="$2" hint reply
+  case "$default" in [yY]*) hint="Y/n" ;; *) hint="y/N" ;; esac
+  if [ "$ASSUME_YES" = yes ] || [ ! -r /dev/tty ]; then reply="$default"
+  else
+    read -r -p "$prompt [$hint]: " reply < /dev/tty || reply=""
+    reply="${reply:-$default}"
+  fi
   case "$reply" in [yY]*) return 0 ;; *) return 1 ;; esac
 }
 
@@ -100,8 +106,9 @@ check_deps() {
 ask_install_dir() {
   local def="$1" reply
   while :; do
-    reply="$(ask "install to $def? (y/n, or another path under \$HOME)" "y")"
-    case "$reply" in
+    if [ "$ASSUME_YES" = yes ] || [ ! -r /dev/tty ]; then printf '%s' "$def"; return 0; fi
+    read -r -p "install to $def? [Y/n, or another path under \$HOME]: " reply < /dev/tty || reply=""
+    case "${reply:-y}" in
       [yY]|[yY][eE][sS]) printf '%s' "$def"; return 0 ;;
       [nN]|[nN][oO]) return 1 ;;
       *)

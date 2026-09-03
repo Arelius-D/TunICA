@@ -14,6 +14,8 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ### Fixed
 
+- Prompts now mark their default in the usual way, as `[Y/n]` and `[y/N]`.
+
 ---
 
 ## [1.0.4] - 2026-09-03
