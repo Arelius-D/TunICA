@@ -416,7 +416,7 @@ do_uninstall() {
   fi
   rm -rf "$INSTALL_DIR"
   LOG_FILE="${TUNICA_INSTALL_LOG:-}"
-  log INFO "removed $INSTALL_DIR, and the installer log that lived in it"
+  log INFO "removed $INSTALL_DIR"
 }
 
 do_check() {
