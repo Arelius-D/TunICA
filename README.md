@@ -192,7 +192,7 @@ curl -fsSL https://raw.githubusercontent.com/Arelius-D/TunICA/main/install.sh | 
 
 The installer downloads TunICA itself: nothing to clone, nothing to build.
 
-The installer is **user space only**: no `sudo`, nothing written outside your home. It asks where to install (default `~/TunICA`), asks two onboarding questions into `tunica.env`, and offers a `tunica` alias per shell rc file it finds (`.zshrc`, `.bashrc`, `config.fish`, `.profile`), in a marked block it can remove again. Nothing is written to `~/.local/bin` and nothing is added to your `PATH`.
+The installer is **user space only**: no `sudo`, nothing written outside your home. It asks where to install (default `~/TunICA`), asks three onboarding questions into `tunica.env` (model, where maps go, and the viewer port), and offers a `tunica` alias per shell rc file it finds (`.zshrc`, `.bashrc`, `config.fish`, `.profile`), in a marked block it can remove again. Nothing is written to `~/.local/bin` and nothing is added to your `PATH`.
 
 ```bash
 ./install.sh --check       # verify an installation and its dependencies
@@ -207,6 +207,10 @@ The installer is **user space only**: no `sudo`, nothing written outside your ho
 tunica ~/GitHub/some-repo     # map a local repository
 tunica view                   # open the result in a browser
 ```
+
+With no reverse proxy in front of it, `tunica view` prints `http://127.0.0.1:8866/`
+and serves on loopback. Over SSH it binds every interface instead and lists the
+addresses it can be reached at.
 
 A whole run, start to finish, with what it spent. At depth 1 that is one call:
 
