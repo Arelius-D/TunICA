@@ -259,7 +259,7 @@ scripts; with no terminal to ask at, it refuses rather than assuming.
 
 ## 6. Configuration Guide
 
-Settings live in `tunica.env`, which ships with TunICA and sits beside the script. Every line in it is commented out, so an untouched file means every built-in default applies; the installer fills in your onboarding answers, and you can edit the rest whenever you like. Precedence, highest first: **command-line flag → shell environment → `tunica.env` → built-in default.**
+Settings live in `tunica.env`, which ships with TunICA and sits beside the script. Every line in it is commented out, so an untouched file means every built-in default applies; the installer fills in your onboarding answers. Precedence, highest first: **command-line flag → shell environment → `tunica.env` → built-in default.**
 
 | Variable | Default | Purpose |
 | :--- | :--- | :--- |
@@ -289,7 +289,7 @@ out/<repo-name>/
   .work/               prompts, raw responses, envelopes, graph.json, file tree
 ```
 
-Every `.md` is plain Markdown with a Mermaid block, so it renders in VS Code, on GitHub, in Obsidian, or in the bundled offline viewer. `.work/` exists so a map can be recompiled without spending another model call; delete it whenever you like.
+Every `.md` is plain Markdown with a Mermaid block, so it renders in VS Code, on GitHub, in Obsidian, or in the bundled offline viewer. `.work/` lets a map be recompiled without another model call, and is safe to delete.
 
 ---
 
@@ -317,7 +317,7 @@ maps and your `tunica.env`. Everything the page can do, the command line can do.
 
 ### Keeping the viewer up
 
-`tunica view` is a foreground server: it runs until you press Ctrl+C. It ends with the terminal that started it, so closing an SSH session or rebooting the host takes it with it. Your maps are files and survive both; the server does not.
+`tunica view` is a foreground server: it runs until you press Ctrl+C. It ends with the terminal that started it. The maps are files and outlive it.
 
 If you want it to come back on its own, ask for it once:
 
@@ -329,18 +329,18 @@ tunica service remove           # take it back out
 
 Nothing is installed by default and nothing here uses `sudo`: the unit lands in `~/.config/systemd/user/`, not in `/etc`. Two things it will tell you about:
 
-- **Lingering.** A user manager stops when you log out, so on a headless host the service dies with your SSH session unless lingering is on. `install` checks and prints the one command that fixes it: `loginctl enable-linger <you>`. That command may ask for a password; nothing else here does.
+- **Lingering.** A user manager stops when you log out, so on a headless host the service dies with your SSH session unless lingering is on. `install` checks, and prints `loginctl enable-linger <you>` if it is off. That is the only command here that may ask for a password.
 - **`TUNICA_VIEW_BIND=auto` means loopback under a service.** `auto` decides by looking for an SSH session, and a service has none, so it binds `127.0.0.1` and answers nobody on the network. Set `TUNICA_VIEW_BIND=0.0.0.0` in `tunica.env` and restart the unit.
 
 Updating differs too. With a service running, `install.sh --update` and the viewer's update button both replace the files under a process that keeps running the old ones; both then tell you to run `systemctl --user restart tunica.service` rather than to restart a terminal.
 
 ### Reaching the viewer from another machine
 
-On a headless host the viewer binds every interface and prints one URL per address, because which one your laptop can route to depends on your network, not on this tool.
+On a headless host the viewer binds every interface and prints one URL per address.
 
 Behind an existing reverse proxy, point it at the port and set `TUNICA_VIEW_URL` so the printed link is the public one. A proxy expects its upstream to be there; pair it with `tunica service install`, or the first request after you close your terminal is a 502. Note the upstream address: a proxy running in a container usually cannot reach the host's `127.0.0.1`, and needs the docker bridge gateway instead.
 
-Two instances, two routes. The installed one you use, and the checkout you develop in, are separate installations with separate `tunica.env` files, separate map roots and separate ports, so give each its own route rather than moving one port between them.
+Two instances, two routes. The installed one and a development checkout are separate installations with their own `tunica.env`, map root and port.
 
 ```caddyfile
 yourdomain.com {
@@ -370,13 +370,13 @@ TUNICA_VIEW_PORT="8867"
 TUNICA_VIEW_URL="https://yourdomain.com/tunica-dev"
 ```
 
-The installed one is the one worth keeping up: `tunica service install` it. The dev one is started and restarted by hand as you work with `bin/tunica dev`, and stopping it does not touch the installed one, because they are different ports, different units and different directories.
+Keep the installed one up with `tunica service install`. The dev one is started and stopped by hand as you work; the two are independent.
 
 ```bash
 TUNICA_VIEW_BIND=0.0.0.0 TUNICA_VIEW_URL=https://yourdomain.com/tunica tunica view
 ```
 
-The viewer is a static file server with no authentication. Expose it deliberately: it serves your maps, and your maps describe your code.
+The viewer is a static file server with no authentication.
 
 ---
 
@@ -394,7 +394,7 @@ Every run ends with exactly what it cost:
 [INFO]   list price     $0.7314  (CLI estimate; drawn from your plan, not invoiced)
 ```
 
-Cache reads are reported separately because they are free; folding them into the total would overstate a run several times over. Per-call figures are kept in `out/<repo>/.work/usage.json`.
+Cache reads are free and reported separately, outside the billed total. Per-call figures are kept in `out/<repo>/.work/usage.json`.
 
 ---
 
