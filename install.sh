@@ -8,7 +8,8 @@
 #   ./install.sh --uninstall     remove the installation
 #   ./install.sh --check         verify an installation and its dependencies
 #
-#   --path DIR   install location (default: $HOME/TunICA)
+#   --path DIR   install location (default: the installation this copy sits in,
+#                otherwise $HOME/TunICA)
 #   -y, --yes    accept every default, ask nothing (for scripted installs)
 #   --no-alias   do not set an alias or touch any shell rc file
 #   -v           print installer version
@@ -28,10 +29,10 @@ if [ -n "$SELF" ] && [ -f "$SELF" ]; then
 else
   SOURCE_DIR="$PWD"
 fi
-HELP_LINES='2,19p'
+HELP_LINES='2,20p'
 NL=$'\n'
 LOG_FILE="${TUNICA_INSTALL_LOG:-$HOME/.tunica-install.log}"
-INSTALL_DIR="${TUNICA_INSTALL_DIR:-$HOME/TunICA}"
+INSTALL_DIR="${TUNICA_INSTALL_DIR:-}"
 ASSUME_YES=no
 ACTION=install
 WIRE_PATH=yes
@@ -66,6 +67,14 @@ confirm() {
   fi
   case "$reply" in [yY]*) return 0 ;; *) return 1 ;; esac
 }
+default_install_dir() {
+  if [ -n "$SELF" ] && [ -f "$SELF" ] && [ -f "$SOURCE_DIR/tunica.sh" ] \
+     && [ -d "$SOURCE_DIR/lib" ] && [ ! -f "$SOURCE_DIR/README.md" ]; then
+    printf '%s' "$SOURCE_DIR"
+  else
+    printf '%s' "$HOME/TunICA"
+  fi
+}
 under_home() {
   local home target
   home="$(readlink -m "$HOME")"
@@ -90,6 +99,7 @@ while [ $# -gt 0 ]; do
     *) printf 'unknown option: %s\n\n' "$1" >&2; usage >&2; exit 2 ;;
   esac
 done
+[ -n "$INSTALL_DIR" ] || INSTALL_DIR="$(default_install_dir)"
 RESOLVED_DIR="$(under_home "$INSTALL_DIR")" \
   || die "TunICA installs into your home directory only: $INSTALL_DIR"
 INSTALL_DIR="$RESOLVED_DIR"

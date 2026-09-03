@@ -14,6 +14,18 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ### Fixed
 
+- `--update`, `--uninstall` and `--check` looked at `$HOME/TunICA` no matter
+  which copy of the installer was run, so every installation that answered the
+  install prompt with a different location was unreachable by its own installer:
+  running `/home/you/Apps/TunICA/install.sh --update` reported nothing installed
+  at `/home/you/TunICA` and stopped. An installer that sits in an installation,
+  next to the `tunica.sh` and `lib` it copied there, now takes that installation
+  as its target unless `--path` or `TUNICA_INSTALL_DIR` says otherwise. A source
+  tree is told apart by the `README.md` an installation never receives, whether
+  it arrived by `git clone` or as an extracted tarball, so `--update` run inside
+  one cannot overwrite it with `main`. The piped one-liner sits in no directory
+  at all and still offers `$HOME/TunICA`.
+
 ---
 
 ## [1.1.0] - 2026-09-03
