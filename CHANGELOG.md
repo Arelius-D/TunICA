@@ -14,6 +14,11 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ### Fixed
 
+- Every installer prompt showed its default in brackets without saying what the
+  brackets meant, so the first thing a new install asks for looked like a
+  question with no obvious answer. Each one now reads `[Enter = <default>]`, and
+  the install location and onboarding are introduced by a line saying so.
+
 ---
 
 ## [1.0.2] - 2026-09-03

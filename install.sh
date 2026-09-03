@@ -53,7 +53,7 @@ die() { log ERROR "$*"; exit 1; }
 ask() {
   local prompt="$1" default="$2" reply
   if [ "$ASSUME_YES" = yes ] || [ ! -r /dev/tty ]; then printf '%s' "$default"; return; fi
-  read -r -p "$prompt [$default]: " reply < /dev/tty || reply=""
+  read -r -p "$prompt  [Enter = $default]: " reply < /dev/tty || reply=""
   printf '%s' "${reply:-$default}"
 }
 confirm() {
@@ -240,7 +240,7 @@ onboard() {
     return
   fi
   claude="$(cat /tmp/.tunica-claude-path.$$ 2>/dev/null || true)"
-  log INFO "onboarding: four questions, all changeable later in $env_file"
+  log INFO "three questions, all changeable later in $env_file. Enter accepts each default."
   model="$(ask "  default model (sonnet / opus / haiku)" "sonnet")"
   out_root="$(ask "  where should generated maps be written" "$INSTALL_DIR/out")"
   out_root="${out_root/#\~/$HOME}"
@@ -263,6 +263,7 @@ do_install() {
   check_deps || die "a required dependency is missing"
 
   if [ "$fresh" = yes ]; then
+    log INFO "where should TunICA be installed? Enter accepts the default."
     INSTALL_DIR="$(ask "install location" "$INSTALL_DIR")"
     INSTALL_DIR="${INSTALL_DIR/#\~/$HOME}"
   fi
