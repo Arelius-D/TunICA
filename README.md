@@ -340,37 +340,22 @@ On a headless host the viewer binds every interface and prints one URL per addre
 
 Behind an existing reverse proxy, point it at the port and set `TUNICA_VIEW_URL` so the printed link is the public one. A proxy expects its upstream to be there; pair it with `tunica service install`, or the first request after you close your terminal is a 502. Note the upstream address: a proxy running in a container usually cannot reach the host's `127.0.0.1`, and needs the docker bridge gateway instead.
 
-Two instances, two routes. The installed one and a development checkout are separate installations with their own `tunica.env`, map root and port.
-
 ```caddyfile
 yourdomain.com {
-    # the installed instance: ~/TunICA, TUNICA_VIEW_PORT=8866
     handle /tunica/* {
         uri strip_prefix /tunica
         reverse_proxy 172.17.0.1:8866     # docker bridge gateway, not 127.0.0.1
     }
-
-    # the dev checkout: ~/GitHub/TunICA, TUNICA_VIEW_PORT=8867
-    handle /tunica-dev/* {
-        uri strip_prefix /tunica-dev
-        reverse_proxy 172.17.0.1:8867
-    }
 }
 ```
 
-Set the port per instance in each one's own `tunica.env`, and `TUNICA_VIEW_URL` to the route it is served at:
+Set the route it is served at in `tunica.env`:
 
 ```bash
-# ~/TunICA/tunica.env
-TUNICA_VIEW_PORT="8866"
 TUNICA_VIEW_URL="https://yourdomain.com/tunica"
-
-# ~/GitHub/TunICA/tunica.env
-TUNICA_VIEW_PORT="8867"
-TUNICA_VIEW_URL="https://yourdomain.com/tunica-dev"
 ```
 
-Keep the installed one up with `tunica service install`. The dev one is started and stopped by hand as you work; the two are independent.
+Keep it up with `tunica service install`.
 
 ```bash
 TUNICA_VIEW_BIND=0.0.0.0 TUNICA_VIEW_URL=https://yourdomain.com/tunica tunica view
